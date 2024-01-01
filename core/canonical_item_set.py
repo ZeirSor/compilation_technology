@@ -88,13 +88,14 @@ class CanonicalItemSet:
         return next_symbols
 
     def __repr__(self):
-        return f"CanonicalItemSet(start_item={self.start_item}, items={self.items})"
+        return f"CanonicalItemSet(seq_num={self.seq_num}, items={self.items})"
 
     def __str__(self):
         return f"{[item for item in self.items]}"
 
     def __eq__(self, other):
-        return self.seq_num == other.seq_num
+        return self.items == other.items
 
     def __hash__(self):
+        # 将对象的哈希值定义为对象属性的哈希值的异或操作
         return hash(self.seq_num)

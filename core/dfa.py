@@ -37,3 +37,17 @@ class DFA(object):
 
         print("DFA.build_transitions")
         return self.status_list
+
+    def print_dfa(self):
+        for i in range(len(self.status_list)):
+            state = self.status_list[i]
+            print(state.seq_num, state)
+            for k, v in state.next_status_dict.items():
+                print(f"    {state.seq_num}---{k}--->{v.seq_num} {v}")
+            print('------------------------------------------------')
+
+    def __str__(self):
+        return f"DFA({self.start_item}, {self.status_list})"
+
+    def __repr__(self):
+        return f"DFA({self.start_item}, {self.status_list})"

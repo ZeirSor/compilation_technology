@@ -11,6 +11,19 @@ class ItemType(Enum):
 
 
 class Item(object):
+    object_registry = []
+
+    def __new__(cls, production: ProductionFormula, position: int):
+        # 检查对象是否已经创建过
+        for insts in cls.object_registry:
+            if insts.production == production and insts.position == position:
+                return insts
+
+        # 如果没有创建过，调用父类的 __new__ 方法创建新的实例
+        instance = super(Item, cls).__new__(cls)
+        # 将新创建的实例添加到对象注册表中
+        cls.object_registry.append(instance)
+        return instance
 
     def __init__(self, production: ProductionFormula, position: int):
         self.production = production
@@ -34,7 +47,7 @@ class Item(object):
         if self.production.gen_is_epsilon():
             self.rhs = '·'
 
-        self.type = self.judge_item_type()
+        # self.type = self.judge_item_type()
 
     def shift(self):
         if self.position != len(self.rhs) - 1:

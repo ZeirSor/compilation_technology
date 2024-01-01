@@ -31,11 +31,13 @@ class Grammar(object):
                 if production.gen_is_epsilon():
                     break
                 # 规约项目是接受项目的特殊情况，将拓展项目的第一个规约项目其标记为接受
+                item.type = item.judge_item_type()
+
                 if count == 0 and item.is_reduce():
-                    item.item_type = ItemType.ACCEPT
+                    item.type = ItemType.ACCEPT
 
                 item_list.append(item)
-                count = count + 1
+            count = count + 1
 
         return item_list
 
