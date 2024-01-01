@@ -1,4 +1,4 @@
-from core import ProductionFormula, Grammar, Item
+from core import ProductionFormula, Grammar
 
 
 def get_productions(filepath: str) -> list:
@@ -25,22 +25,35 @@ def create_grammar(filepath: str):
     return grammar
 
 
-
-
 if __name__ == '__main__':
-    grammar = create_grammar('../examples/example1.txt')
-    print(grammar.terminals)
-    print(grammar.non_terminals)
-    print(grammar.start_symbol)
-    print(grammar.to_dict())
+    # grammar = create_grammar('../examples/example1.txt')
+    # print(grammar.terminals)
+    # print(grammar.non_terminals)
+    # print(grammar.start_symbol)
+    # print(grammar.production_to_dict())
+    #
+    # print('------------------------------------------------------------------------------------------')
 
-    for i in grammar.items:
-        print(i, i.type)
+    grammar2 = create_grammar('../examples/example2.txt')
+    print(grammar2.terminals)
+    print(grammar2.non_terminals)
+    print(grammar2.start_symbol)
+    print(grammar2.production_to_dict())
+
+    print('------------------------------------------------------------------------------------------')
+
+    # grammar3 = create_grammar('../examples/example3.txt')
+    # print(grammar3.terminals)
+    # print(grammar3.non_terminals)
+    # print(grammar3.start_symbol)
+    # print(grammar3.production_to_dict())
+    # dfa = DFA(grammar, grammar.items[0])
+    # init_itemset = CanonicalItemSet(grammar, grammar.items[0])
+    # for i in grammar.items:
+    #     print(i, i.type)
     # s = 'sadfADF'
     # sep = '·'
     # lst = list(s)
     # lst.insert(1, sep)
     # print(lst)
     # print(''.join(lst))
-
-
