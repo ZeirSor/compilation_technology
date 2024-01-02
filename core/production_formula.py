@@ -2,13 +2,15 @@ class ProductionFormula(object):
     """
     This class is used to represent a production formula.
     """
-    __separator = '->'
+
+    __separator = '->'  # Separator used to separate the left-hand side (lhs) and right-hand side (rhs) of the formula
 
     def __init__(self, lhs, rhs):
-        self.lhs = lhs
-        self.rhs = rhs
-        self.non_terminal = set(filter(str.isupper, lhs)) | set(filter(str.isupper, rhs))
-        self.terminal = set(filter(str.islower, rhs))
+        self.lhs = lhs  # Left-hand side of the production formula
+        self.rhs = rhs  # Right-hand side of the production formula
+        self.non_terminal = set(filter(str.isupper, lhs)) | set(
+            filter(str.isupper, rhs))  # Set of non-terminal symbols in the formula
+        self.terminal = set(filter(str.islower, rhs))  # Set of terminal symbols in the formula
 
     @classmethod
     def __get_separator(cls) -> str:
@@ -19,10 +21,8 @@ class ProductionFormula(object):
         cls.__separator = new_separator
 
     def generation_is_empty(self):
-        if self.rhs == 'ε':
-            return True
-        else:
-            return False
+        # Check if the right-hand side of the formula is equal to 'ε' (empty)
+        return self.rhs == 'ε'
 
     def __str__(self):
         return f"{self.lhs} {self.__get_separator()} {self.rhs}"

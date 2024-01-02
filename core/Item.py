@@ -11,23 +11,24 @@ class ItemType(Enum):
 
 
 class Item(object):
-    object_registry = []
+    object_registry = []  # Registry to keep track of created instances
 
     def __new__(cls, production: ProductionFormula, position: int):
-        # 检查对象是否已经创建过
-        for insts in cls.object_registry:
-            if insts.production == production and insts.position == position:
-                return insts
+        # Check if the object has already been created
+        for inst in cls.object_registry:
+            if inst.production == production and inst.position == position:
+                return inst
 
-        # 如果没有创建过，调用父类的 __new__ 方法创建新的实例
+        # If the object hasn't been created, call the parent class's __new__ method to create a new instance
         instance = super(Item, cls).__new__(cls)
-        # 将新创建的实例添加到对象注册表中
+        # Add the newly created instance to the object registry
         cls.object_registry.append(instance)
         return instance
 
     def __init__(self, production: ProductionFormula, position: int):
-
         self.production = production
+        self.position = position
+        self.lhs = self.production.lhs
 
         try:
             if position < 0:
@@ -38,23 +39,23 @@ class Item(object):
             print(f"Warning: {e}")
             position = max(0, min(position, len(self.production.rhs)))
 
-        self.position = position
-        self.lhs = self.production.lhs
-
-        # 先将字符串转化为字符列表，再将·插入列表，再转化回字符串
+        # Insert the · symbol at the specified position in the right-hand side (rhs) string
         rhs_list = list(self.production.rhs)
         rhs_list.insert(position, '·')
         self.rhs = ''.join(rhs_list)
+
+        # If the production's generation is empty, set rhs to ·
         if self.production.generation_is_empty():
             self.rhs = '·'
-        # self.judge_item_type()
 
     def shift(self):
+        # Create a new item by shifting the position by 1, if possible
         if self.position != len(self.rhs) - 1:
             return Item(self.production, self.position + 1)
         return self
 
     def judge_item_type(self) -> ItemType:
+        # Determine the item type based on the position and the character following · in the rhs
         if self.position == len(self.rhs) - 1:
             return ItemType.REDUCE
         elif self.rhs[self.position + 1] in self.production.terminal:

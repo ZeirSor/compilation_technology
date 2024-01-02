@@ -20,26 +20,27 @@ class Grammar(object):
         self.item_dict = self.item_to_dict()
 
     def gen_all_items(self):
-        item_list = []
+        item_list = []  # Initialize an empty list to store the generated items
 
         count = 0
-        for production in self.productions:
-            for position in range(len(production.rhs) + 1):
-                item = Item(production, position)
+        for production in self.productions:  # Iterate over all productions in the grammar
+            for position in range(
+                    len(production.rhs) + 1):  # Iterate over all positions in the right-hand side of the production, including the end position
+                item = Item(production, position)  # Create a new item object with the current production and position
 
-                # 空产生式只会有一个项目
-                if production.generation_is_empty():
-                    break
-                # 规约项目是接受项目的特殊情况，将拓展项目的第一个规约项目其标记为接受
-                item.type = item.judge_item_type()
+                # Handle special cases for empty productions and accept item
+                if production.generation_is_empty():  # If the production generates the empty string
+                    break  # Skip generating additional items
+                item.type = item.judge_item_type()  # Determine the type of the item
 
-                if count == 0 and item.is_reduce():
-                    item.type = ItemType.ACCEPT
+                # The specification project is a special case of accepting the project. Mark the first specification project of the expansion project as accepted.
+                if count == 0 and item.is_reduce():  # If it is the first production and the item is a reduce item
+                    item.type = ItemType.ACCEPT  # Set the item type to accept
 
-                item_list.append(item)
+                item_list.append(item)  # Append the generated item to the item list
             count = count + 1
 
-        return item_list
+        return item_list  # Return the generated item list
 
     def get_symbol_start_item(self, lhs):
         start_item_list = []
