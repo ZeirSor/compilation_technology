@@ -6,9 +6,14 @@ def get_productions(filepath: str) -> list:
 
     with open(filepath, encoding='utf-8', mode='r') as f:
         for line in f:
-            lhs, rhs = line.strip().split('->')
-            productions.append(ProductionFormula(lhs, rhs))
-
+            line = line.replace(' ', '')
+            if '|' not in line:
+                lhs, rhs = line.strip().split('->')
+                productions.append(ProductionFormula(lhs, rhs))
+            else:
+                lhs, rhs_list = line.strip().split('->')
+                for rhs in rhs_list.split('|'):
+                    productions.append(ProductionFormula(lhs, rhs))
     # 扩展文法
     start_symbol = productions[0].__str__()[0]
     start_lhs = start_symbol + '\''

@@ -4,10 +4,10 @@ from enum import Enum, auto
 
 
 class ItemType(Enum):
-    SHIFT = auto()
-    PENDING = auto()
-    REDUCE = auto()
-    ACCEPT = auto()
+    SHIFT = "Shift Item"
+    PENDING = "Pending Item"
+    REDUCE = "Reduce Item"
+    ACCEPT = "Accept Item"
 
 
 class Item(object):
@@ -26,6 +26,7 @@ class Item(object):
         return instance
 
     def __init__(self, production: ProductionFormula, position: int):
+
         self.production = production
 
         try:
@@ -44,10 +45,9 @@ class Item(object):
         rhs_list = list(self.production.rhs)
         rhs_list.insert(position, '·')
         self.rhs = ''.join(rhs_list)
-        if self.production.gen_is_epsilon():
+        if self.production.generation_is_empty():
             self.rhs = '·'
-
-        # self.type = self.judge_item_type()
+        # self.judge_item_type()
 
     def shift(self):
         if self.position != len(self.rhs) - 1:
@@ -55,7 +55,6 @@ class Item(object):
         return self
 
     def judge_item_type(self) -> ItemType:
-
         if self.position == len(self.rhs) - 1:
             return ItemType.REDUCE
         elif self.rhs[self.position + 1] in self.production.terminal:

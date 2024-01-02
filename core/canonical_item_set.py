@@ -1,5 +1,13 @@
 from .item import Item
+
 from typing import List
+from enum import Enum, auto
+
+
+class StateType(Enum):
+    INITIAL = "Initial State"
+    MEDIATE = "Mediate State"
+    FINAL = "Final State"
 
 
 class CanonicalItemSet:
@@ -11,7 +19,7 @@ class CanonicalItemSet:
     def __new__(cls, grammar, start_item: List[Item]):
         # 检查对象是否已经创建过
         for insts in cls.object_registry:
-            if insts.start_item == start_item and insts.grammar == grammar:
+            if insts.start_item_list == start_item and insts.grammar == grammar:
                 return insts
 
         # 如果没有创建过，调用父类的 __new__ 方法创建新的实例
@@ -20,7 +28,7 @@ class CanonicalItemSet:
         cls.object_registry.append(instance)
         return instance
 
-    def __init__(self, grammar, start_item: List[Item]):
+    def __init__(self, grammar, start_item_list: List[Item], state_type=StateType.MEDIATE):
         # 通过静态属性获取唯一的状态编号
         self.seq_num = CanonicalItemSet.status_num
         # 自增状态编号，确保下一个项目集有不同的状态编号
@@ -29,10 +37,10 @@ class CanonicalItemSet:
         self.grammar = grammar
 
         # 项目集的起始项目
-        self.start_item: List[Item] = start_item
+        self.start_item_list: List[Item] = start_item_list
 
         # 通过闭包算法计算项目的闭包（closure），得到项目集中包含的项目列表
-        self.items: List[Item] = self.closure(start_item)
+        self.items: List[Item] = self.closure(start_item_list)
 
         self.next_symbols = self.get_next_symbols()
 
@@ -41,8 +49,10 @@ class CanonicalItemSet:
         # 键是输入符号，值是对应的项目集对象
         self.next_status_dict = {}
 
-    def closure(self, start_item: List[Item]):
-        closure_list = start_item
+        self.state_type = state_type
+
+    def closure(self, start_item_list: List[Item]):
+        closure_list = start_item_list
 
         expanded = True
         while expanded:
@@ -75,6 +85,12 @@ class CanonicalItemSet:
         next_item_set = CanonicalItemSet(self.grammar, next_item_list)
 
         return next_item_set
+
+    def set_state_to_final(self):
+        self.state_type = StateType.FINAL
+
+    def set_state_to_initial(self):
+        self.state_type = StateType.INITIAL
 
     def get_next_symbols(self):
         next_symbols = []

@@ -18,7 +18,7 @@ class ProductionFormula(object):
     def _set_separator(cls, new_separator: str):
         cls.__separator = new_separator
 
-    def gen_is_epsilon(self):
+    def generation_is_empty(self):
         if self.rhs == 'ε':
             return True
         else:

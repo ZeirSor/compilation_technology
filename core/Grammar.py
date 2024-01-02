@@ -13,13 +13,13 @@ class Grammar(object):
         self.__set_terminals()
 
         self.start_symbol: str = self.productions[0].lhs
-        self.items: List[Item] = self.gen_items()
+        self.items: List[Item] = self.gen_all_items()
         self.start_item = self.items[0]
 
         self.production_dict = self.production_to_dict()
         self.item_dict = self.item_to_dict()
 
-    def gen_items(self):
+    def gen_all_items(self):
         item_list = []
 
         count = 0
@@ -28,7 +28,7 @@ class Grammar(object):
                 item = Item(production, position)
 
                 # 空产生式只会有一个项目
-                if production.gen_is_epsilon():
+                if production.generation_is_empty():
                     break
                 # 规约项目是接受项目的特殊情况，将拓展项目的第一个规约项目其标记为接受
                 item.type = item.judge_item_type()

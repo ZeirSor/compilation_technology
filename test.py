@@ -6,19 +6,14 @@ from typing import Dict, List
 def test(filepath):
     grammar = create_grammar(filepath)
     lr0_parser = LR0Parser(grammar)
-
-    # print('non_terminals', grammar.non_terminals)
-    # print('start_symbol', grammar.start_symbol)
-    # print(grammar.production_to_dict())
-    # status_list = grammar.dfa.status_list
-    # for state in status_list:
-    #     print(state.seq_num, state.items, state.next_symbols)
     return lr0_parser
-    # return grammar
 
 
-parser = test('./examples/example2.txt')
+parser = test('./examples/example5.txt')
+assert isinstance(parser, LR0Parser)
 
-parser.parse('abbcde')
-
-# print(lr0_parser)
+print(parser.grammar.productions)
+print(parser.state_set)
+print(parser.dfa.print_dfa())
+print(parser.show_action_goto_table())
+print(parser.parse('bccd'))
