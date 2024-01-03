@@ -105,14 +105,20 @@ class LR0Parser:
 
                     if res == "Error":
                         self.show_parsing_table(step_num, step_num, each_step_dict, all_step_dict)
+                        self.each_step_dict = each_step_dict
+                        self.all_step_dict = all_step_dict
                         return "Error"
                 elif act.lower() == 'acc':
                     update_step_dict(step_num, state_stack, symbol_stack, input_buffer, f'{act}')
                     self.show_parsing_table(step_num, each_step_dict, all_step_dict)
+                    self.each_step_dict = each_step_dict
+                    self.all_step_dict = all_step_dict
                     return "Accept!"
             else:
                 update_step_dict(step_num, state_stack, symbol_stack, input_buffer, 'error')
                 self.show_parsing_table(step_num, each_step_dict, all_step_dict)
+                self.each_step_dict = each_step_dict
+                self.all_step_dict = all_step_dict
                 return "Error"
 
     def handle_shift(self, state_stack, symbol_stack, input_buffer, num):
