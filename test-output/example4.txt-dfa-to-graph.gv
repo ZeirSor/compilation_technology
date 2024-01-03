@@ -1,0 +1,14 @@
+// The Round Table
+digraph {
+	0
+	1
+	2
+	3
+	4
+	0 -> 1 [label=S]
+	0 -> 2 [label=x]
+	0 -> 3 [label=y]
+	2 -> 2 [label=x]
+	2 -> 3 [label=y]
+	2 -> 4 [label=S]
+}

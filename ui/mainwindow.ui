@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1605</width>
-    <height>953</height>
+    <width>1548</width>
+    <height>875</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -211,7 +211,7 @@
            </font>
           </property>
           <property name="currentIndex">
-           <number>3</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="canonicalItemSet_Tab">
            <attribute name="title">
@@ -229,16 +229,12 @@
            </attribute>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_7" stretch="2,0">
+             <layout class="QVBoxLayout" name="dfa_verticalLayout" stretch="9,1">
               <item>
-               <widget class="QLabel" name="label_4">
-                <property name="text">
-                 <string/>
-                </property>
-               </widget>
+               <layout class="QHBoxLayout" name="dfa_horizontalLayout"/>
               </item>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_8">
+               <layout class="QHBoxLayout" name="lookup_item_set_horizontalLayout">
                 <item>
                  <widget class="QPushButton" name="lookup_item_set">
                   <property name="sizePolicy">
@@ -391,8 +387,6 @@
              </widget>
             </item>
            </layout>
-           <zorder>widget</zorder>
-           <zorder>runBtn</zorder>
           </widget>
          </widget>
         </item>

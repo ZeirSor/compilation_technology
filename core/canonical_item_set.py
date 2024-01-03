@@ -5,9 +5,9 @@ from enum import Enum, auto
 
 
 class StateType(Enum):
-    INITIAL = "Initial State"
-    MEDIATE = "Mediate State"
-    FINAL = "Final State"
+    INITIAL = "Initial"
+    MEDIATE = "Mediate"
+    FINAL = "Final"
 
 
 class CanonicalItemSet:

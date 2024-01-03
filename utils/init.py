@@ -1,7 +1,7 @@
-from core import ProductionFormula, Grammar
+from core import ProductionFormula, Grammar, LR0Parser
 
 
-def get_productions(filepath: str) -> list:
+def load_productions(filepath: str) -> list:
     productions = []
 
     with open(filepath, encoding='utf-8', mode='r') as f:
@@ -24,10 +24,15 @@ def get_productions(filepath: str) -> list:
 
 
 def create_grammar(filepath: str):
-    productions = get_productions(filepath)
+    productions = load_productions(filepath)
     grammar = Grammar(productions)
-
     return grammar
+
+
+def create_parser(filepath):
+    grammar = create_grammar(filepath)
+    lr0_parser = LR0Parser(grammar)
+    return lr0_parser
 
 
 if __name__ == '__main__':

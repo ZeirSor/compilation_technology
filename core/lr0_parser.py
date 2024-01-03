@@ -158,7 +158,7 @@ class LR0Parser:
         for k, v in data.items():
             v.update(self.goto_table[k])
 
-        return dict_to_2d_table(data, rows, columns)
+        dict_to_2d_table(data, rows, columns)
 
     def show_parsing_table(self, step_num, each_step_dict, all_step_dict):
         rows = list(range(1, step_num + 1))

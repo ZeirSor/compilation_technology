@@ -1,11 +1,11 @@
-import sys
+from graphviz import Digraph
 
-from PyQt5.QtWidgets import QApplication
+dot = Digraph(comment='这是一个有向图')
+dot.node('A', '作者', fontname="Heiti")
+dot.node('B', '医生')
+dot.node('C', '律师')
+dot.edges(['AB', 'AC'])
+dot.edge('B', 'C')
+dot.format = 'png'
 
-from ui.my_mainwindow import MyMainWindow
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    main_window = MyMainWindow()
-    main_window.show()
-    sys.exit(app.exec_())
+dot.render('test-output/round-table.gv', view=True, format='png')

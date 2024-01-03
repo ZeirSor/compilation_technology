@@ -2,14 +2,18 @@ import os
 import sys
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QPixmap
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidgetItem, QVBoxLayout, QGridLayout, QLabel, \
-    QListWidget, QWidget, QTableWidgetItem, QAbstractItemView, QHeaderView, QSizePolicy
+    QListWidget, QWidget, QTableWidgetItem, QAbstractItemView, QHeaderView, QSizePolicy, QFrame, QGraphicsScene, \
+    QGraphicsPixmapItem, QDialog, QTextBrowser
 
 from core import LR0Parser
 from .mainwindow import Ui_MainWindow
-from utils import create_grammar
+from utils.init import create_grammar
+from utils.print_tools import create_graph
 import warnings
+
+from .my_graphics_view import MyGraphicsView
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -21,9 +25,9 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
         self.openFileBtn.setEnabled(True)
         self.runBtn.setEnabled(False)
+        self.start_analyze_pushButton.setEnabled(False)
 
         self.grammar = None
-
         self.setTabStyleSheet(self.productionItem_tabWidget, 2.45)
         self.setTabStyleSheet(self.function_tabWidget, 9.85)
 
@@ -31,31 +35,83 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.openFileBtn.clicked.connect(self.import_productions)
         self.runBtn.clicked.connect(self.init_LR0Parser)
         self.start_analyze_pushButton.clicked.connect(self.analyze_input)
+        self.lookup_item_set.clicked.connect(self.show_lookup_dialog)
+
+        # 设置默认选中的页面为第一个
+        self.function_tabWidget.setCurrentIndex(0)
+        self.productionItem_tabWidget.setCurrentIndex(0)
+
+    def show_lookup_dialog(self):
+        lookup_dialog = QDialog(self)
+        lookup_dialog.setWindowTitle("Lookup Item Set")
+        lookup_dialog.setModal(False)
+        # 隐藏右上角的问号按钮
+        lookup_dialog.setWindowFlags(lookup_dialog.windowFlags() & ~Qt.WindowContextHelpButtonHint)
+        lookup_layout = QGridLayout(lookup_dialog)
+
+        count = 0
+        # 循环遍历网格，为每个单元格创建有边框的小部件，其中包含编号标签和无边框的QListWidget
+        for i in range(self.grid_num1):
+            for j in range(self.grid_num2):
+                # 创建有边框的小部件
+                cell_widget = QFrame()
+                cell_widget.setStyleSheet("border: 1px solid black; border-radius: 10px;")  # 设置圆角边框
+
+                cell_layout = QVBoxLayout(cell_widget)
+
+                if count < len(self.lr0_parser.state_set):
+                    # 插入编号标签
+                    # print(i, j, n)
+                    label = QLabel(f'State {count} -- {self.lr0_parser.state_set[count].state_type.value}')
+                    label.setStyleSheet("border: none;")
+                    label.setFont(QFont("Arial", 15, QFont.Bold))  # 设置黑体、加粗、字号大一点
+                    cell_layout.addWidget(label)
+
+                    # 插入 QListWidget，并去掉边框
+                    list_widget = QListWidget()
+                    list_widget.setStyleSheet("border: none;")  # 去掉QListWidget的边框
+                    list_widget.setSelectionMode(QListWidget.NoSelection)
+
+                    for item in self.lr0_parser.state_set[count].items:
+                        list_item = QListWidgetItem(item.__str__())
+                        list_item.setFont(QFont("Arial", 13))
+                        list_item.setToolTip(item.__repr__())
+                        list_widget.addItem(list_item)
+
+                    cell_layout.addWidget(list_widget)
+
+                    # 将小部件插入到网格中
+                    lookup_layout.addWidget(cell_widget, i, j)
+
+                    count = count + 1
+
+        lookup_dialog.exec_()
 
     def insert_item_set(self):
         # 创建网格布局
         grid_layout = QGridLayout(self.item_set_widget)
 
         n = len(self.lr0_parser.state_set)
-        num1, num2 = self.find_closest_numbers(n)
+        self.grid_num1, self.grid_num2 = self.find_closest_numbers(n)
         # 初始化一个数据列表
         data_list = ["Item 1", "Item 2", "Item 3"]
 
-        print(num1, num2)
+        print('-----------', self.grid_num1, self.grid_num2)
+        # print(num1, num2)
 
         count = 0
         # 循环遍历网格，为每个单元格创建有边框的小部件，其中包含编号标签和无边框的QListWidget
-        for i in range(num1):
-            for j in range(num2):
+        for i in range(self.grid_num1):
+            for j in range(self.grid_num2):
                 # 创建有边框的小部件
-                cell_widget = QWidget()
-                cell_widget.setStyleSheet("border: 1px solid black;")
+                cell_widget = QFrame()
+                cell_widget.setStyleSheet("border: 1px solid black; border-radius: 10px;")  # 设置圆角边框
 
                 cell_layout = QVBoxLayout(cell_widget)
 
                 if count < n:
                     # 插入编号标签
-                    print(i, j, n)
+                    # print(i, j, n)
                     label = QLabel(f'State {count} -- {self.lr0_parser.state_set[count].state_type.value}')
                     label.setStyleSheet("border: none;")
                     label.setFont(QFont("Arial", 15, QFont.Bold))  # 设置黑体、加粗、字号大一点
@@ -76,6 +132,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
                     # 将小部件插入到网格中
                     grid_layout.addWidget(cell_widget, i, j)
+
                     count = count + 1
 
         # 设置网格布局到 item_set_widget
@@ -112,7 +169,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         # font.setItalic(True)
         font.setBold(True)
         # self.analyze_tableWidget.verticalHeader().setFont(font)
-        self.analyze_tableWidget.horizontalHeader().setFont(font)
+        self.states_num_tableWidget.horizontalHeader().setFont(font)
 
         # 插入列编号，从1到10
         for i in range(states_num):
@@ -136,6 +193,9 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         for i in range(states_num):
             header.setSectionResizeMode(i, QHeaderView.Stretch)
 
+        header = self.states_num_tableWidget.horizontalHeader()
+        for i in range(1):
+            header.setSectionResizeMode(i, QHeaderView.Stretch)
         # header = self.states_num_tableWidget.horizontalHeader()
         # for i in range(states_num):
         #     header.setSectionResizeMode(i, QHeaderView.Stretch)
@@ -150,7 +210,6 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
         col_headers = sorted(self.lr0_parser.grammar.terminals) + ['#']
         self.action_tableWidget.setColumnCount(len(col_headers))
-        print(col_headers)
 
         self.action_tableWidget.setVerticalHeaderLabels([str(x) for x in list(range(states_num))])
         self.action_tableWidget.setHorizontalHeaderLabels(col_headers)
@@ -198,7 +257,6 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         col_headers = sorted(self.lr0_parser.grammar.non_terminals)
         col_headers.remove(self.lr0_parser.grammar.start_symbol)
         self.goto_tableWidget.setColumnCount(len(col_headers))
-        print(len(col_headers))
 
         self.goto_tableWidget.setVerticalHeaderLabels([str(x) for x in list(range(states_num))])
         self.goto_tableWidget.setHorizontalHeaderLabels(col_headers)
@@ -213,7 +271,6 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         dict = self.lr0_parser.goto_table
         for i in range(states_num):
             for j in col_headers:
-                print(j)
                 item = QTableWidgetItem(str((dict[i].get(j, ''))))
                 font = QFont("Times New Roman", 12)
                 font.setItalic(True)
@@ -241,6 +298,10 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         print('按钮2被点击')
         self.openFileBtn.setEnabled(True)
         self.runBtn.setEnabled(False)
+        self.start_analyze_pushButton.setEnabled(True)
+
+        # 将文本框的回车信号连接到按钮的点击事件
+        self.inputString_lineEdit.returnPressed.connect(self.start_analyze_pushButton.click)
 
         self.lr0_parser = LR0Parser(self.grammar)
 
@@ -258,6 +319,32 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
     def show_dfa_states(self):
         print('show_dfa_states')
+        dot = create_graph(self.lr0_parser)
+        png_path = f'test-output/{self.file_name}-dfa-to-graph.gv'
+        dot.render(png_path, view=False, format='png')
+
+        # # 从文件加载图片
+        # pixmap = QPixmap(png_path + '.png')
+        # # 设置 QLabel 的尺寸和缩放图片以适应 QLabel（铺满）
+        # self.dfa_graph_Label.setPixmap(
+        #     pixmap
+        # )
+
+        # 创建一个场景和 MyGraphicsView
+        scene = QGraphicsScene(self)
+        view = MyGraphicsView(scene)
+
+        # 在场景中添加一个图片项
+        pixmap_item = QGraphicsPixmapItem(QPixmap(png_path + '.png'))
+        scene.addItem(pixmap_item)
+
+        # 添加 MyGraphicsView 到你的布局中
+        view.setStyleSheet("border: none;")
+        self.dfa_horizontalLayout.addWidget(view)
+
+        # self.dfa_verticalLayout.addWidget(self.lookup_item_set)
+
+        # self.dfa_graph_Label.setScaledContents(True)
         ...
 
     def show_action_goto_table(self):
@@ -267,53 +354,54 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
 
     def analyze_input(self):
         print('analyze_input')
+        if self.grammar is not None:
 
-        input_str = self.inputString_lineEdit.text()
-        self.lr0_parser.parse(input_str)
+            input_str = self.inputString_lineEdit.text()
+            self.lr0_parser.parse(input_str)
 
-        print(self.lr0_parser.all_step_dict.keys())
-        print(self.lr0_parser.each_step_dict.keys())
+            # print(self.lr0_parser.all_step_dict.keys())
+            # print(self.lr0_parser.each_step_dict.keys())
 
-        # self.action_tableWidget.setRowCount(states_num)
+            # self.action_tableWidget.setRowCount(states_num)
 
-        row_headers = [str(x) for x in list(self.lr0_parser.all_step_dict.keys())]
-        self.analyze_tableWidget.setRowCount(len(row_headers))
-        print(row_headers)
+            row_headers = [str(x) for x in list(self.lr0_parser.all_step_dict.keys())]
+            self.analyze_tableWidget.setRowCount(len(row_headers))
+            # print(row_headers)
 
-        col_headers = list(self.lr0_parser.each_step_dict.keys())
-        self.analyze_tableWidget.setColumnCount(len(col_headers))
-        print(col_headers)
+            col_headers = list(self.lr0_parser.each_step_dict.keys())
+            self.analyze_tableWidget.setColumnCount(len(col_headers))
+            # print(col_headers)
 
-        font = QFont("Times New Roman", 15)
-        # font.setItalic(True)
-        font.setBold(True)
-        self.analyze_tableWidget.verticalHeader().setFont(font)
-        self.analyze_tableWidget.horizontalHeader().setFont(font)
-        #
-        self.analyze_tableWidget.setVerticalHeaderLabels(row_headers)
-        self.analyze_tableWidget.setHorizontalHeaderLabels(col_headers)
+            font = QFont("Times New Roman", 15)
+            # font.setItalic(True)
+            font.setBold(True)
+            self.analyze_tableWidget.verticalHeader().setFont(font)
+            self.analyze_tableWidget.horizontalHeader().setFont(font)
+            #
+            self.analyze_tableWidget.setVerticalHeaderLabels(row_headers)
+            self.analyze_tableWidget.setHorizontalHeaderLabels(col_headers)
 
-        dict = self.lr0_parser.all_step_dict
-        for i in range(1, len(row_headers) + 1):
-            for j in col_headers:
-                item = QTableWidgetItem(str(dict[i].get(j, '')))
-                font = QFont("Times New Roman", 12)
-                font.setItalic(True)
-                font.setBold(True)
-                item.setFont(font)
-                self.analyze_tableWidget.setItem(i - 1, col_headers.index(j), item)
-                item.setTextAlignment(Qt.AlignCenter)
+            dict = self.lr0_parser.all_step_dict
+            for i in range(1, len(row_headers) + 1):
+                for j in col_headers:
+                    item = QTableWidgetItem(str(dict[i].get(j, '')))
+                    font = QFont("Times New Roman", 12)
+                    font.setItalic(True)
+                    font.setBold(True)
+                    item.setFont(font)
+                    self.analyze_tableWidget.setItem(i - 1, col_headers.index(j), item)
+                    item.setTextAlignment(Qt.AlignCenter)
 
-        self.analyze_tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
-        self.analyze_tableWidget.setAlternatingRowColors(True)
-        #
-        header = self.analyze_tableWidget.verticalHeader()
-        for i in range(len(row_headers)):
-            header.setSectionResizeMode(i, QHeaderView.Stretch)
+            self.analyze_tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            self.analyze_tableWidget.setAlternatingRowColors(True)
+            #
+            header = self.analyze_tableWidget.verticalHeader()
+            for i in range(len(row_headers)):
+                header.setSectionResizeMode(i, QHeaderView.Stretch)
 
-        header = self.analyze_tableWidget.horizontalHeader()
-        for i in range(len(col_headers)):
-            header.setSectionResizeMode(i, QHeaderView.Stretch)
+            header = self.analyze_tableWidget.horizontalHeader()
+            for i in range(len(col_headers)):
+                header.setSectionResizeMode(i, QHeaderView.Stretch)
         ...
 
     def set_grammar(self, grammar):
@@ -323,12 +411,13 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         width = tabWidget.width()
         tabCount = tabWidget.count()
         tabWidth = width / tabCount * size
-        print(tabWidget, tabCount, tabWidth, width)
+        # print(tabWidget, tabCount, tabWidth, width)
         tabWidget.setStyleSheet(f"QTabBar::tab{{width:{tabWidth}%;}}")
 
     def import_productions(self):
         self.openFileBtn.setEnabled(False)
         self.runBtn.setEnabled(True)
+        self.start_analyze_pushButton.setEnabled(False)
 
         self.production_listWidget.clear()
         self.item_listWidget.clear()
@@ -342,6 +431,8 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         file_name = os.path.basename(abs_file_path)
 
         print("File Name:", abs_file_path)
+
+        self.file_name = file_name
 
         self.fileNameLineEdit_.setText(file_name)
 
