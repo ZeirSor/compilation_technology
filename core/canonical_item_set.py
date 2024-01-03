@@ -78,9 +78,10 @@ class CanonicalItemSet:
         next_item_list = []
 
         for item in self.items:
-            if item.rhs[item.position + 1] == symbol:
-                # 移除箭头，将项目加入新的项目集中
-                next_item_list.append(item.shift())
+            if item.is_shift() or item.is_pending():
+                if item.rhs[item.position + 1] == symbol:
+                    # 移除箭头，将项目加入新的项目集中
+                    next_item_list.append(item.shift())
 
         next_item_set = CanonicalItemSet(self.grammar, next_item_list)
 

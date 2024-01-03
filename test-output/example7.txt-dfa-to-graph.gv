@@ -1,0 +1,19 @@
+// The Round Table
+digraph {
+	0
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	0 -> 1 [label=S]
+	0 -> 2 [label="("]
+	2 -> 3 [label=A]
+	2 -> 4 [label=B]
+	2 -> 5 [label=b]
+	3 -> 5 [label=b]
+	3 -> 6 [label=")"]
+	3 -> 7 [label=B]
+}

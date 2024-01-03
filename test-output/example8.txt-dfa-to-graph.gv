@@ -1,0 +1,36 @@
+// The Round Table
+digraph {
+	0
+	1
+	2
+	3
+	4
+	5
+	6
+	7
+	8
+	9
+	10
+	11
+	0 -> 1 [label=E]
+	0 -> 2 [label=T]
+	0 -> 3 [label=F]
+	0 -> 4 [label="("]
+	0 -> 5 [label=i]
+	1 -> 6 [label="+"]
+	4 -> 2 [label=T]
+	4 -> 3 [label=F]
+	4 -> 4 [label="("]
+	4 -> 5 [label=i]
+	4 -> 8 [label=E]
+	6 -> 3 [label=F]
+	6 -> 4 [label="("]
+	6 -> 5 [label=i]
+	6 -> 9 [label=T]
+	7 -> 4 [label="("]
+	7 -> 5 [label=i]
+	7 -> 10 [label=F]
+	8 -> 11 [label=")"]
+	8 -> 6 [label="+"]
+	9 -> 7 [label="*"]
+}

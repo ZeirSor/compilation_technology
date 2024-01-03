@@ -32,13 +32,20 @@ class LR0Parser:
             if state.next_status_dict:
                 for shift, next_state in state.next_status_dict.items():
                     # print(shift, next_state.seq_num)
-                    if shift.islower():
+                    if not shift.isupper():
                         self.action_table[state.seq_num][shift] = f"S_{next_state.seq_num}"
                     elif shift.isupper():
                         self.goto_table[state.seq_num][shift] = next_state.seq_num
             else:
                 if len(state.items) > 1:
-                    print('存在规约-规约冲突！！！')
+                    print(state, '存在冲突')
+                    reduce_num = len([item for item in state.items if item.is_reduce() or item.is_accept()])
+                    shift_num = len(state.items) - reduce_num
+
+                    if reduce_num > 1:
+                        print(f'规约-规约冲突：存在{reduce_num}个归约项')
+                    if shift_num and shift_num:
+                        print(f'移进-规约冲突：存在{shift_num}个移进项, {reduce_num}个归约项')
                 else:
                     item = state.start_item_list[0]
                     if item.is_reduce():

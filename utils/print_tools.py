@@ -22,6 +22,6 @@ def create_graph(lr0_parser):
     for state in lr0_parser.state_set:
         if state.next_status_set:
             for symbol, next_state in state.next_status_dict.items():
-                print(f"{state.seq_num}-->{next_state.seq_num}")
+                # print(f"{state.seq_num}-->{next_state.seq_num}")
                 dot.edge(str(state.seq_num), str(next_state.seq_num), label=symbol)
     return dot

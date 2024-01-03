@@ -10,7 +10,7 @@ class ProductionFormula(object):
         self.rhs = rhs  # Right-hand side of the production formula
         self.non_terminal = set(filter(str.isupper, lhs)) | set(
             filter(str.isupper, rhs))  # Set of non-terminal symbols in the formula
-        self.terminal = set(filter(str.islower, rhs))  # Set of terminal symbols in the formula
+        self.terminal = set(filter(lambda x: not x.isupper(), rhs))  # Set of terminal symbols in the formula
 
     @classmethod
     def __get_separator(cls) -> str:

@@ -96,7 +96,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         # 初始化一个数据列表
         data_list = ["Item 1", "Item 2", "Item 3"]
 
-        print('-----------', self.grid_num1, self.grid_num2)
+        # print('-----------', self.grid_num1, self.grid_num2)
         # print(num1, num2)
 
         count = 0

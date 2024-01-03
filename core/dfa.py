@@ -25,6 +25,7 @@ class DFA(object):
             for state in self.states_list:
                 if state.next_symbols:
                     for symbol in state.next_symbols:
+                        # print(state, symbol)
                         new_state = state.goto(symbol)
                         if new_state not in self.states_list:
                             self.states_list.append(new_state)
