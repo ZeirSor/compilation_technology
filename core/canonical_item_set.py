@@ -52,39 +52,47 @@ class CanonicalItemSet:
         self.state_type = state_type
 
     def closure(self, start_item_list: List[Item]):
+        # 初始化闭包列表为输入的起始项目集
         closure_list = start_item_list
 
+        # expanded标志项目集有无扩大，项目集没扩大代表算法完成，退出循环
         expanded = True
         while expanded:
             expanded = False
-
+            # 遍历当前闭包列表中的每个项目
             for item in closure_list:
+                # 检查项目是否处于待约状态（即尚未扩展）
                 if item.is_pending():
+                    # 获取项目点后面的符号
                     next_symbol = item.rhs[item.position + 1]
+                    # 获取该符号的起始项目集
                     next_items = self.grammar.get_symbol_start_item(next_symbol)
-
+                    # 将起始项目集中的项目添加到闭包列表，如果不在列表中则进行扩展，并设置expanded = True
                     for next_item in next_items:
                         if next_item not in closure_list:
                             closure_list.append(next_item)
                             expanded = True
 
+        # 返回最终闭包列表
         return closure_list
 
     def goto(self, symbol):
-        """
-        计算下一个项目集，其中当前项目集中的项目都是形如A -> alpha B beta的形式，
-        且beta的第一个符号是符号symbol。
-        """
+        # 初始化新的项目列表
         next_item_list = []
 
+        # 遍历当前项目集中的每个项目
         for item in self.items:
+            # 如果项目是移进项目或者待约项目
             if item.is_shift() or item.is_pending():
+                # 如果项目的点后面的符号等于给定的符号
                 if item.rhs[item.position + 1] == symbol:
-                    # 移除箭头，将项目加入新的项目集中
+                    # 将当前项目的移进项目加入新的项目列表中
                     next_item_list.append(item.shift())
 
+        # 根据新的项目列表创建一个新的项目集
         next_item_set = CanonicalItemSet(self.grammar, next_item_list)
 
+        # 返回新的项目集
         return next_item_set
 
     def set_state_to_final(self):

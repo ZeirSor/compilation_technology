@@ -18,42 +18,56 @@ class LR0Parser:
         self.action_table: Dict[int, Dict[str, List[str, int]]] = {}
         self.goto_table: Dict[int, Dict[str, int]] = {}
 
+        self.conflict_msg = None
         self.build_parsing_table()
 
     def build_parsing_table(self):
-
+        # 初始化动作表和GOTO表，确保每个状态都有对应的表项
         for i in range(len(self.state_set)):
-            if i not in self.action_table:
-                self.action_table[i] = {}
-            if i not in self.goto_table:
-                self.goto_table[i] = {}
+            self.action_table[i] = {}
+            self.goto_table[i] = {}
 
+        # 遍历每个状态集合
         for state in self.state_set:
+            # 如果当前状态有下一个状态
             if state.next_status_dict:
-                for shift, next_state in state.next_status_dict.items():
-                    # print(shift, next_state.seq_num)
-                    if not shift.isupper():
-                        self.action_table[state.seq_num][shift] = f"S_{next_state.seq_num}"
-                    elif shift.isupper():
-                        self.goto_table[state.seq_num][shift] = next_state.seq_num
-            else:
+                # 遍历状态的下一个状态字典，其中键为移进的符号，值为下一个状态
+                for shift_symbol, next_state in state.next_status_dict.items():
+                    # 如果移进的符号是终结符
+                    if not shift_symbol.isupper():
+                        # 在动作表中记录移进项
+                        self.action_table[state.seq_num][shift_symbol] = f"S_{next_state.seq_num}"
+                    # 如果移进的符号是非终结符
+                    elif shift_symbol.isupper():
+                        # 在GOTO表中记录下一个状态
+                        self.goto_table[state.seq_num][shift_symbol] = next_state.seq_num
+            else:  # 如果状态没有下一个状态，说明是规约或接受项
+                # 项目集中存在冲突
                 if len(state.items) > 1:
+                    conflict_msg = f"状态{state.seq_num} {state.__str__()}存在冲突！"
+                    # 存在归约项冲突
                     print(state, '存在冲突')
                     reduce_num = len([item for item in state.items if item.is_reduce() or item.is_accept()])
                     shift_num = len(state.items) - reduce_num
 
                     if reduce_num > 1:
                         print(f'规约-规约冲突：存在{reduce_num}个归约项')
+                        conflict_msg = conflict_msg + '\n' + f"规约-规约冲突：存在{reduce_num}个归约项"
                     if shift_num and shift_num:
                         print(f'移进-规约冲突：存在{shift_num}个移进项, {reduce_num}个归约项')
+                        conflict_msg = conflict_msg + '\n' + f"移进-规约冲突：存在{shift_num}个移进项, {reduce_num}个归约项"
+
+                    self.conflict_msg = conflict_msg
                 else:
+                    # 只有一个项目，可能是规约或接受项
                     item = state.start_item_list[0]
                     if item.is_reduce():
-                        # print(f'reduce: {item}, {item.type}')
+                        # 归约项，记录在动作表中
                         for symbol in self.grammar.terminals + ['#']:
                             self.action_table[state.seq_num][
                                 symbol] = f"r_{self.grammar.productions.index(item.production)}"
                     elif item.is_accept():
+                        # 接受项，记录在动作表中
                         self.action_table[state.seq_num]['#'] = "acc"
 
     def parse(self, input_string):
@@ -89,20 +103,24 @@ class LR0Parser:
             current_state = state_stack[-1]
             current_symbol = input_buffer[0]
 
+            # 检查动作表中是否存在对应项
             if current_state in self.action_table and current_symbol in self.action_table[current_state]:
                 all_step_dict[step_num] = {key: '' for key in each_step_dict.keys()}
                 each_goto = None
 
+                # 解析动作表中的内容
                 act = self.action_table[current_state][current_symbol].split('_')
                 if len(act) == 1:
                     act = act[0]
                 else:
                     act, num = act
                 if act.lower() == 's':
+                    # 移进操作
                     update_step_dict(step_num, state_stack, symbol_stack, input_buffer, f'{act}_{num}')
                     self.handle_shift(state_stack, symbol_stack, input_buffer, num)
                     step_num = step_num + 1
                 elif act.lower() == 'r':
+                    # 规约操作
                     update_step_dict(step_num, state_stack, symbol_stack, input_buffer, f'{act}_{num}')
                     res = self.handle_reduce(state_stack, symbol_stack, input_buffer, num, each_step_dict)
 
@@ -111,17 +129,20 @@ class LR0Parser:
                     step_num = step_num + 1
 
                     if res == "Error":
+                        # 处理规约可能的错误情况
                         self.show_parsing_table(step_num, step_num, each_step_dict, all_step_dict)
                         self.each_step_dict = each_step_dict
                         self.all_step_dict = all_step_dict
                         return "Error"
                 elif act.lower() == 'acc':
+                    # 接受操作
                     update_step_dict(step_num, state_stack, symbol_stack, input_buffer, f'{act}')
                     self.show_parsing_table(step_num, each_step_dict, all_step_dict)
                     self.each_step_dict = each_step_dict
                     self.all_step_dict = all_step_dict
-                    return "Accept!"
+                    return "Accept"
             else:
+                # 处理无法匹配动作的情况
                 update_step_dict(step_num, state_stack, symbol_stack, input_buffer, 'error')
                 self.show_parsing_table(step_num, each_step_dict, all_step_dict)
                 self.each_step_dict = each_step_dict
@@ -130,31 +151,30 @@ class LR0Parser:
 
     def handle_shift(self, state_stack, symbol_stack, input_buffer, num):
         # 处理shift操作的逻辑
-
-        state_stack.append(int(num))
-        symbol_stack.append(input_buffer[0])
-        input_buffer.pop(0)
+        state_stack.append(int(num))  # 将新的状态压入状态栈
+        symbol_stack.append(input_buffer[0])  # 将当前输入符号压入符号栈
+        input_buffer.pop(0)  # 从输入缓冲区中移除当前符号
 
     def handle_reduce(self, state_stack, symbol_stack, input_buffer, num, each_step_dict):
         # 处理reduce操作的逻辑
 
-        reduce_production = self.grammar.productions[int(num)]
+        reduce_production = self.grammar.productions[int(num)]  # 获取归约所用的产生式
 
         k = len(reduce_production.rhs)
         while k > 0:
-            state_stack.pop()
-            symbol_stack.pop()
+            state_stack.pop()  # 从状态栈中弹出k个状态
+            symbol_stack.pop()  # 从符号栈中弹出k个符号
             k -= 1
 
-        non_terminal = reduce_production.lhs
-        next_state = self.goto_table[state_stack[-1]].get(non_terminal, None)
-        symbol_stack.append(non_terminal)
+        non_terminal = reduce_production.lhs  # 获取产生式的左侧非终结符
+        symbol_stack.append(non_terminal)  # 将左侧非终结符压入符号栈
 
+        next_state = self.goto_table[state_stack[-1]].get(non_terminal, None)  # 获取下一个状态
         if next_state is not None:
-            each_step_dict['goto'] = next_state
-            state_stack.append(self.goto_table[state_stack[-1]][non_terminal])
+            each_step_dict['goto'] = next_state  # 更新当前步骤的Goto信息
+            state_stack.append(self.goto_table[state_stack[-1]][non_terminal])  # 将下一个状态压入状态栈
         else:
-            return "Error"
+            return "Error"  # 如果下一个状态不存在，则返回错误
 
     def show_action_goto_table(self):
         rows = list(range(len(self.state_set)))

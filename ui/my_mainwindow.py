@@ -2,18 +2,18 @@ import os
 import sys
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QPixmap
+from PyQt5.QtGui import QFont, QPixmap, QPalette
 from PyQt5.QtWidgets import QApplication, QMainWindow, QFileDialog, QListWidgetItem, QVBoxLayout, QGridLayout, QLabel, \
     QListWidget, QWidget, QTableWidgetItem, QAbstractItemView, QHeaderView, QSizePolicy, QFrame, QGraphicsScene, \
-    QGraphicsPixmapItem, QDialog, QTextBrowser
+    QGraphicsPixmapItem, QDialog, QTextBrowser, QMessageBox
 
 from core import LR0Parser
 from .mainwindow import Ui_MainWindow
 from utils.init import create_grammar
 from utils.print_tools import create_graph
-import warnings
-
 from .my_graphics_view import MyGraphicsView
+
+import warnings
 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
@@ -312,6 +312,10 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         self.show_dfa_states()
         self.show_action_goto_table()
 
+        print("conflict_msg:", self.lr0_parser.conflict_msg)
+        if self.lr0_parser.conflict_msg:
+            QMessageBox.warning(self, '警告', self.lr0_parser.conflict_msg)
+
     def show_CanonicalItemSet(self):
         print('show_CanonicalItemSet')
         self.insert_item_set()
@@ -357,7 +361,7 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
         if self.grammar is not None:
 
             input_str = self.inputString_lineEdit.text()
-            self.lr0_parser.parse(input_str)
+            res = self.lr0_parser.parse(input_str)
 
             # print(self.lr0_parser.all_step_dict.keys())
             # print(self.lr0_parser.each_step_dict.keys())
@@ -402,6 +406,31 @@ class MyMainWindow(QMainWindow, Ui_MainWindow):
             header = self.analyze_tableWidget.horizontalHeader()
             for i in range(len(col_headers)):
                 header.setSectionResizeMode(i, QHeaderView.Stretch)
+
+            # 弹出信息框
+            # 第一个信息框，绿色字体
+            if res == "Accept":
+                info_box = QMessageBox(self)
+                info_box.setWindowTitle("提示")
+                info_box.setText(f"输入串 \"{input_str}\" LR(0) 分析成功！")
+                info_box.setIcon(QMessageBox.Information)
+                # 自定义字体和颜色
+                font = QFont("Arial", 17)  # 设置字体为 Arial，字号为 17
+                info_box.setFont(font)
+                info_box.addButton(QMessageBox.Ok)
+                info_box.exec()
+
+            # 第二个信息框，红色字体
+            else:
+                warning_box = QMessageBox(self)
+                warning_box.setWindowTitle("提示")
+                warning_box.setText(f"输入串 \"{input_str}\" LR(0) 分析出错！")
+                warning_box.setIcon(QMessageBox.Warning)
+                # 自定义字体和颜色
+                font = QFont("Arial", 17)  # 设置字体为 Arial，字号为 17
+                warning_box.setFont(font)
+                warning_box.addButton(QMessageBox.Ok)
+                warning_box.exec()
         ...
 
     def set_grammar(self, grammar):
