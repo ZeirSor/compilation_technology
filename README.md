@@ -1,108 +1,101 @@
-# 编译课设说明
+# LR(0) Parsing Research - Course Project
 
-## 选题
+## Project Overview
 
->   **LR(0)分析法研究**
+This project is a course project for compiler technology, focusing on the implementation and in-depth study of LR(0)
+parsing. The main objectives and content of the project are outlined below:
 
->   1.   文法使用产生式来定义；
->   2.   给出项目集规范族（即所有的状态）。
->   3.   给出状态间的关系。
->   4.   给出LR(0)分析表。
->
->   5.   给定符号串判定它是否是文法中的句子，分析过程用分析表格的方式打印出来。
+1. **Grammar Definition:** Define the LR(0) grammar using production rules.
 
-## 进度
+2. **Canonical Item Set Family:** Provide the canonical item set family for LR(0) parsing, representing all states.
 
-| 日期   | 内容                            |
-| ------ |-------------------------------|
-| 2020/11/15 | 完成产生式类、项目类、文法类、从文件加载文法、生成所有项目 |
-| 2020/11/16 | |
+3. **State Relationships:** Describe the relationships between different states in the canonical item set family.
 
-- 12.30
-- [x] 产生式类
-- [x] 项目类
-- [x] 文法类
-- [x] 从文件加载文法
-- [x] 生成所有项目类
+4. **LR(0) Parsing Table:** Construct the LR(0) parsing table, showcasing the parsing actions and state transitions for
+   the grammar.
 
-- 12.31 有bug
-- [x] 项目集规范族类
-- [x] 给出项目集规范族（即所有的状态）。
-- [x] 状态类
-- [x] 状态转换函数
-- [x] CLOSURE
-- [x] GOTO
+5. **Symbol String Analysis:** Given a symbol string, determine whether it is a valid sentence in the grammar and print
+   the analysis process using the parsing table.
 
+## Project Structure
 
+```
+├── README.md
+├── requirements.txt
+├── run_lr0_console.py
+├── run_lr0_ui.py
+├── core
+│   ├── canonical_item_set.py
+│   ├── dfa.py
+│   ├── grammar.py
+│   ├── item.py
+│   ├── lr0_parser.py
+│   ├── production_formula.py
+│   └── __init__.py
+├── examples
+│   ├── example1.txt
+│   ├── example2.txt
+│   └── ...
+├── test-output
+│   ├── example1.txt-dfa-to-graph.gv
+│   └── ...
+├── ui
+│   ├── mainwindow.py
+│   ├── mainwindow.ui
+│   ├── my_graphics_view.py
+│   ├── my_mainwindow.py
+│   └── __init__.py
+└── utils
+    ├── init.py
+    ├── print_tools.py
+    └── __init__.py
+```
 
-## 评分标准
+## Usage Instructions
 
-1.   **课设报告-40**分
-2.   **程序演示**-30**分**
-3.   **PPT介绍**-20分
-4.   回答问题-10分
+1. **Install Dependencies:** Ensure that the required dependencies for the project are installed in your Python
+   environment. You can use the following command:
 
-## **题目分析**
+   ```bash
+   pip install -r requirements.txt
+   ```
 
->   **对自己选择的题目进行分析，提出自己的理解以及想法；**
+2. **Run Console Version:** Execute the following command to run the console version of the LR(0) parser:
 
+   ```bash
+   python run_lr0_console.py
+   ```
 
+   The console version will display information about the grammar, LR(0) items, DFA, action/goto tables, and the
+   analysis process for a given symbol string.
 
+3. **Run GUI Version:** Execute the following command to open the graphical user interface (GUI) version:
 
+   ```bash
+   python run_lr0_ui.py
+   ```
 
+   The GUI version allows interactive loading of grammars, visualization of DFA, and symbol string analysis.
 
+4. **Example Grammars:** The `examples` directory contains example grammars for testing. Feel free to modify or add new
+   grammars for testing purposes.
 
-## **算法分析与设计**
+## Course Project Requirements
 
->   **根据自己所选题目，说明自己所选择的算法，介绍算法原理及自己认为的关键知识点。设计算法的程序流程图；**
+1. **Grammar Definition:** Define an LR(0) grammar using production rules.
 
+2. **Canonical Item Set Family:** Provide the canonical item set family for LR(0) parsing, representing all states.
 
+3. **State Relationships:** Describe the relationships between different states in the canonical item set family.
 
+4. **LR(0) Parsing Table:** Construct the LR(0) parsing table, showcasing the parsing actions and state transitions for
+   the grammar.
 
+5. **Symbol String Analysis:** Given a symbol string, determine whether it is a valid sentence in the grammar and print
+   the analysis process using the parsing table.
 
+## Notes
 
-
-## **功能设计**
-
->   **给出你课程设计的功能模块及其之间的关系，画出功能结构图；**
-
-
-
-
-
-
-
-
-
-## **数据结构设计**
-
->   **结合你设计的算法和功能，说明你设计的系统所需要的数据及其数据结构；**
-
-
-
-
-
-
-
-## **实现过程**
-
->   **给出实现的关键步骤和重要的代码（注意不要将全部代码粘贴到报告中，完整源代码通过电子文件提交）；**
-
-
-
-
-
-
-
-## **运行结果**
-
->   **给出程序运行过程中主要的截图，并且对截图进行简单解释和说明。**
-
-
-
-
-
-
-
-
-
+- Ensure that project dependencies are installed.
+- Check the console output and GUI interface for detailed parser information and results.
+- For symbol string analysis, provide correct input for accurate analysis.
