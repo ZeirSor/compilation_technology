@@ -152,3 +152,4 @@ cython_debug/
 .idea/
 
 sonar-project.properties
+..scannerwork/
